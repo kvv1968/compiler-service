@@ -19,7 +19,7 @@ import java.util.ArrayList;
 @Slf4j
 public class SwaggerConfig {
 
-    @Value("${app.base-url}")
+    @Value("${compiler.base-url}")
     private String baseUrl;
 
     @Bean
