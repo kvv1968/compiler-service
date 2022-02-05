@@ -14,23 +14,5 @@ public class RoleService {
     private RoleRepository roleRepository;
 
 
-    public Role addRole(Role role) {
-        return roleRepository.save(role);
-    }
-
-
-    public List<Role> getAllRoles() {
-        return roleRepository.findAll();
-    }
-
-
-    public List<Role> addAllRoles(List<Role> roles) {
-        return roleRepository.saveAll(roles);
-    }
-
-
-    public Role findRoleByName(String name) {
-        return roleRepository.findRoleByRole(name);
-    }
 
 }

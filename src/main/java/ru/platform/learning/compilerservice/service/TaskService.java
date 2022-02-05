@@ -15,43 +15,9 @@ public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
 
-    public List<TaskTemplate> getAllTaskTemplates() {
-        return taskRepository.findAll();
-    }
-
-
-    public TaskTemplate createTaskTemplate(TaskTemplate taskTemplate) {
-        return taskRepository.saveAndFlush(taskTemplate);
-    }
-    @Transactional
-    public List<TaskTemplate> createListTaskTemplates(List<TaskTemplate> taskTemplates) {
-        return taskRepository.saveAll(taskTemplates);
-    }
-
-
-    public TaskTemplate updateTaskTemplate(TaskTemplate taskTemplate) {
-        return taskRepository.save(taskTemplate);
-    }
-
-
-    public void deleteTaskTemplate(Long id) {
-        taskRepository.deleteById(id);
-    }
-
-
 
     public TaskTemplate findTaskTemplateById(Long id) {
         return taskRepository.findById(id).orElse(null);
-    }
-
-
-    public void deleteAll() {
-        taskRepository.deleteAll();
-    }
-
-
-    public List<TaskTemplate> findTaskTemplateByLessonTopic(LessonTopic lessonTopic) {
-        return taskRepository.findTaskTemplateByLessonTopic(lessonTopic);
     }
 
 

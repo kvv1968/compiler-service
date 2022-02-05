@@ -11,6 +11,4 @@ public interface TaskRepository extends JpaRepository<TaskTemplate, Long> {
 
     List<TaskTemplate>findTaskTemplateByLessonTopic(LessonTopic lessonTopic);
 
-    TaskTemplate findTaskTemplateByLessonTopicAndId(LessonTopic lessonTopic, Long id);
-
 }
