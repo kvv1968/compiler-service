@@ -33,7 +33,7 @@
             </timeBasedFileNamingAndTriggeringPolicy>
 
             <totalSizeCap>1GB</totalSizeCap>
-            <maxHistory>2</maxHistory>
+            <maxHistory>5</maxHistory>
         </rollingPolicy>
     </appender>
 
