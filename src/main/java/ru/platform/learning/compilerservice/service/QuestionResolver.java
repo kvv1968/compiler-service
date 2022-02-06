@@ -2,8 +2,9 @@ package ru.platform.learning.compilerservice.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.platform.learning.compilerservice.entity.UserTask;
-import ru.platform.learning.compilerservice.exception.PlatformCompilerException;
+import ru.platform.learning.compilerservice.exception.CompilerException;
+import ru.platform.learning.compilerservice.model.CompilerResult;
+import ru.platform.learning.compilerservice.model.CompilerTask;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -13,40 +14,42 @@ import java.util.List;
 @Service
 public class QuestionResolver {
 
-    public UserTask issueResolutionProcess(UserTask userTask) throws PlatformCompilerException {
-        String template = userTask.getTemplates().getCorrectAnswers();
+    public CompilerResult issueResolutionProcess(CompilerTask compilerTask) throws CompilerException {
+        String template = compilerTask.getCorrectAnswers();
         if (template.contains("#")){
             String[] templates = template.split("#");
-            if (userTask.getAnswer().contains("#")){
-                String[] answers = userTask.getAnswer().split("#");
-                return multipleResponseCheck(userTask, templates, answers);
+            if (compilerTask.getAnswer().contains("#")){
+                String[] answers = compilerTask.getAnswer().split("#");
+                return multipleResponseCheck(templates, answers);
 
             } else {
                 final String msg = "Error wrong task template";
                 log.error(msg);
-                throw new PlatformCompilerException(msg);
+                throw new CompilerException(msg);
             }
         }
-        if (userTask.getAnswer().equals(template)) {
-            userTask.setIsResultTask(true);
-            userTask.setMessage("Ответы правильные");
-            return userTask;
+        CompilerResult compilerResult = new CompilerResult();
+        if (compilerTask.getAnswer().equals(template)) {
+            compilerResult.setIsResultTask(true);
+            compilerResult.setMessage("Ответы правильные");
+            return compilerResult;
         }
-        userTask.setIsResultTask(false);
-        userTask.setMessage("Ответы не правильные");
-        return userTask;
+        compilerResult.setIsResultTask(false);
+        compilerResult.setMessage("Ответы не правильные");
+        return compilerResult;
     }
 
-    private UserTask multipleResponseCheck(UserTask userTask, String[] templates, String[] answers) {
+    private CompilerResult multipleResponseCheck(String[] templates, String[] answers) {
         List<String> result = new LinkedList<>(Arrays.asList(templates));
         result.removeAll(Arrays.asList(answers));
+        CompilerResult compilerResult = new CompilerResult();
         if (result.isEmpty()){
-            userTask.setIsResultTask(true);
-            userTask.setMessage("Ответы правильные");
-            return userTask;
+            compilerResult.setIsResultTask(true);
+            compilerResult.setMessage("Ответы правильные");
+            return compilerResult;
         }
-        userTask.setIsResultTask(false);
-        userTask.setMessage("Ответы не правильные");
-        return userTask;
+        compilerResult.setIsResultTask(false);
+        compilerResult.setMessage("Ответы не правильные");
+        return compilerResult;
     }
 }

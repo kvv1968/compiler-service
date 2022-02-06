@@ -1,24 +1,18 @@
 package ru.platform.learning.compilerservice.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
 import ru.platform.learning.compilerservice.compiler.PlatformCompiler;
 import ru.platform.learning.compilerservice.compiler.PlatformRunner;
-import ru.platform.learning.compilerservice.entity.JavaFile;
-import ru.platform.learning.compilerservice.entity.UserTask;
-import ru.platform.learning.compilerservice.exception.PlatformCompilerException;
+import ru.platform.learning.compilerservice.exception.CompilerException;
+import ru.platform.learning.compilerservice.model.CompilerResult;
+import ru.platform.learning.compilerservice.model.CompilerTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.jar.JarFile;
 
 @Service
 @Slf4j
@@ -28,25 +22,24 @@ public class JavaCompilerService {
     private static final String ROOT_QUALIFIELD_CLASS_NAME = "temp.";
 
 
-    public UserTask startingCompilation(UserTask userTask) {
+    public CompilerResult startingCompilation(CompilerTask compilerTask) {
         try {
-            if (userTask == null) {
+            if (compilerTask == null) {
                 final String msg = "Error compilation CompilerResult is null";
                 log.error(msg);
-                throw new PlatformCompilerException(msg);
+                throw new CompilerException(msg);
             }
 
-            String nameClass = userTask.getTemplates().getNameClass();
+            String nameClass = compilerTask.getNameClass();
             String source;
             String qualifiedClassName = ROOT_QUALIFIELD_CLASS_NAME + nameClass.toLowerCase() + "." + nameClass;
             String namePackage = "package " + ROOT_QUALIFIELD_CLASS_NAME + nameClass.toLowerCase() + ";\n";
 
-            if (userTask.getTemplates().getJavaFile() == null){
-                source = namePackage + userTask.getAnswer();
+            if (compilerTask.getBytes().length == 0){
+                source = namePackage + compilerTask.getAnswer();
             } else {
-                JavaFile jarFile = userTask.getTemplates().getJavaFile();
-                String template = new String(jarFile.getBytes(), StandardCharsets.UTF_8);
-                source = namePackage + template.replace("$", userTask.getAnswer());
+                String template = new String(compilerTask.getBytes(), StandardCharsets.UTF_8);
+                source = namePackage + template.replace("$", compilerTask.getAnswer());
             }
             PlatformRunner runner = new PlatformRunner();
             PlatformCompiler compiler = new PlatformCompiler();
@@ -54,48 +47,43 @@ public class JavaCompilerService {
             byte[] resultBytes = compiler.compile(qualifiedClassName, source);
             String resultCompilation = new String(resultBytes, StandardCharsets.UTF_8);
             if (resultCompilation.startsWith("Error")){
-
-                return compilerExceptionUserTask(userTask, resultCompilation);
+                return compilerExceptionCompilerResult(resultCompilation);
             }
 
             String result = processMain(qualifiedClassName, resultBytes, runner);
 
-            return enrichedCompilerResult(userTask, result);
+            return enrichedCompilerResult(compilerTask, result);
 
         } catch (Throwable ex) {
-
-            return exceptionUserTask(Objects.requireNonNull(userTask),ex);
+            return exceptionCompilerResult(ex);
         }
     }
 
-    private UserTask compilerExceptionUserTask(UserTask userTask, String result) {
-        userTask.setIsResultTask(false);
-        userTask.setMessage(result);
-        return userTask;
+    private CompilerResult compilerExceptionCompilerResult(String result) {
+        CompilerResult compilerResult = new CompilerResult();
+        compilerResult.setIsResultTask(false);
+        compilerResult.setMessage(result);
+        return compilerResult;
     }
 
-    private UserTask enrichedCompilerResult(UserTask userTask, String result) {
-        String correctAnswers = userTask.getTemplates().getCorrectAnswers();
+    private CompilerResult enrichedCompilerResult(CompilerTask compilerTask, String result) {
+        String correctAnswers = compilerTask.getCorrectAnswers();
+        CompilerResult compilerResult = new CompilerResult();
         if (StringUtils.isEmpty(correctAnswers)){
-            return updateCompilerResult(userTask, result);
+            compilerResult.setMessage(result);
+            compilerResult.setIsResultTask(Objects.equals(result, "Тесты пройдены"));
+            return compilerResult;
         }
 
         if(result.equals(correctAnswers)){
-            userTask.setIsResultTask(true);
-            userTask.setMessage("Задача выполнена правильно");
-            return userTask;
+            compilerResult.setIsResultTask(true);
+            compilerResult.setMessage("Задача выполнена правильно");
+            return compilerResult;
         }
-        userTask.setIsResultTask(false);
-        userTask.setMessage("Задача выполнена не правильно");
-        return userTask;
+        compilerResult.setIsResultTask(false);
+        compilerResult.setMessage("Задача выполнена не правильно");
+        return compilerResult;
     }
-
-    private UserTask updateCompilerResult(UserTask userTask, String result){
-        userTask.setMessage(result);
-        userTask.setIsResultTask(Objects.equals(result, "Тесты пройдены"));
-        return userTask;
-    }
-
 
     private String processMain(String qualifiedClassName, byte[] resultBytes, PlatformRunner runner) throws Throwable {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -106,12 +94,13 @@ public class JavaCompilerService {
     }
 
 
-    private UserTask exceptionUserTask(UserTask userTask, Throwable ex) {
+    private CompilerResult exceptionCompilerResult(Throwable ex) {
+        CompilerResult compilerResult = new CompilerResult();
         final String error = ex.getCause().getMessage();
         log.error(ex.getMessage(), ex);
-        userTask.setIsResultTask(false);
-        userTask.setMessage(error);
-        return userTask;
+        compilerResult.setIsResultTask(false);
+        compilerResult.setMessage(error);
+        return compilerResult;
     }
 
 }

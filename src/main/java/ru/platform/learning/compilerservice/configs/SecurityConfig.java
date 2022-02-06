@@ -1,4 +1,4 @@
-package ru.platform.learning.compilerservice.configs.security;
+package ru.platform.learning.compilerservice.configs;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,30 +36,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests().anyRequest().authenticated()
                 .and()
                 .httpBasic();
-//        http
-//                .csrf().disable()
-//                //.cors().disable()
-//
-//                .authorizeRequests()
-//                .antMatchers("/api/**").hasAuthority("ROLE_ADMIN")
-//
-//                .anyRequest()
-//                .authenticated()
-//
-//                .and()
-//                .httpBasic();
-//
-//
-//        http.logout()
-//                // разрешаем делать логаут всем
-//                .permitAll()
-//                // указываем URL логаута
-//                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-//                // указываем URL при удачном логауте
-//                .logoutSuccessUrl("/")
-//                //выклчаем кроссдоменную секьюрность (на этапе обучения неважна)
-//                .and().csrf();
-
 
 
     }
