@@ -35,7 +35,7 @@ public class JavaCompilerService {
             String qualifiedClassName = ROOT_QUALIFIELD_CLASS_NAME + nameClass.toLowerCase() + "." + nameClass;
             String namePackage = "package " + ROOT_QUALIFIELD_CLASS_NAME + nameClass.toLowerCase() + ";\n";
 
-            if (compilerTask.getBytes().length == 0){
+            if (compilerTask.getBytes() == null || compilerTask.getBytes().length == 0){
                 source = namePackage + compilerTask.getAnswer();
             } else {
                 String template = new String(compilerTask.getBytes(), StandardCharsets.UTF_8);
